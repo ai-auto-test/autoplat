@@ -1,6 +1,8 @@
 """Build a bench's adapters from its capability description."""
 from __future__ import annotations
 
+import os
+
 from autoplat.adapters.base import Hardware
 from autoplat.adapters.power import SafePowerSupply
 from autoplat.config import BenchConfig, PowerLimits
@@ -19,6 +21,8 @@ def build_hardware(bench: BenchConfig) -> Hardware:
                               build_id=opts.get("build_id", "IVI-24.3.118"),
                               variant=opts.get("variant", "EU_HIGH"),
                               packages=opts.get("packages"))
+        for fault in filter(None, os.environ.get("AUTOPLAT_SIM_FAULTS", "").split(",")):
+            hw.sim.inject(fault.strip())
 
     def adapter(name: str) -> tuple[str | None, dict]:
         c = caps.get(name)
